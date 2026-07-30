@@ -363,23 +363,12 @@ document.querySelectorAll('.person-btn').forEach(btn => {
     btn.classList.add('active');
     currentPerson = btn.dataset.person;
     await loadTodayForPerson();
+    await refreshStreakAndHistory();
   });
 });
 
 async function loadTodayForPerson() {
-  const entries = await loadAll();
-  const key = todayKey() + ':' + currentPerson;
-  const todayEntry = entries[key];
-  if (todayEntry) {
-    state = {
-      fronts: todayEntry.fronts || {},
-      health: !!todayEntry.health,
-      blocker: todayEntry.blocker || '',
-      extra: todayEntry.extra || ''
-    };
-  } else {
-    state = { fronts: {}, health: false, blocker: '', extra: '' };
-  }
+  state = { fronts: {}, health: false, blocker: '', extra: '' };
   document.getElementById('blocker').value = state.blocker;
   document.getElementById('extra').value = state.extra;
   renderFronts();
