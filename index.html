@@ -464,7 +464,7 @@ async function ensureBin() {
         'X-Master-Key': JSONBIN_KEY,
         'X-Bin-Name': 'lock-in-log'
       },
-      body: JSON.stringify({})
+      body: JSON.stringify({ _init: true })
     });
 
     if (!res.ok) {
@@ -539,6 +539,7 @@ function renderHistory(entries) {
   // group by date
   const byDate = {};
   Object.keys(entries).forEach(combo => {
+    if (combo === '_init') return;
     const idx = combo.lastIndexOf(':');
     const date = combo.slice(0, idx);
     const person = combo.slice(idx + 1);
