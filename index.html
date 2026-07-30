@@ -1,0 +1,592 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Lock In — Daily Log</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&family=Inter:wght@400;500;600&display=swap');
+
+  :root {
+    --ink: #14171C;
+    --ink-2: #1D2128;
+    --ink-3: #262B33;
+    --amber: #E8A33D;
+    --amber-dim: #9C7333;
+    --cream: #EDE8DE;
+    --cream-dim: #8B8F97;
+    --line: #313640;
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    margin: 0;
+    background: var(--ink);
+    color: var(--cream);
+    font-family: 'Inter', sans-serif;
+    min-height: 100vh;
+    padding: 24px 16px 60px;
+  }
+
+  .wrap { max-width: 480px; margin: 0 auto; }
+
+  header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    margin-bottom: 22px;
+    border-bottom: 1px solid var(--line);
+    padding-bottom: 16px;
+  }
+
+  h1 {
+    font-family: 'Space Grotesk', sans-serif;
+    font-weight: 700;
+    font-size: 22px;
+    margin: 0;
+    letter-spacing: -0.02em;
+  }
+
+  .date-label {
+    font-size: 12px;
+    color: var(--cream-dim);
+    margin-top: 4px;
+  }
+
+  .streak {
+    text-align: right;
+  }
+
+  .streak-num {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 28px;
+    font-weight: 700;
+    color: var(--amber);
+    line-height: 1;
+  }
+
+  .streak-label {
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--cream-dim);
+    margin-top: 2px;
+  }
+
+  .person-toggle {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 16px;
+  }
+
+  .person-btn {
+    flex: 1;
+    text-align: center;
+    padding: 9px;
+    border-radius: 8px;
+    border: 1px solid var(--line);
+    background: var(--ink-2);
+    color: var(--cream-dim);
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.15s ease;
+  }
+
+  .person-btn.active {
+    background: var(--amber);
+    color: var(--ink);
+    border-color: var(--amber);
+  }
+
+  .pending-note {
+    font-size: 11.5px;
+    color: var(--amber-dim);
+    background: var(--ink-2);
+    border: 1px dashed var(--line);
+    border-radius: 8px;
+    padding: 10px 12px;
+    margin-bottom: 12px;
+    line-height: 1.4;
+  }
+
+  .front {
+    background: var(--ink-2);
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    padding: 14px 16px;
+    margin-bottom: 10px;
+  }
+
+  .front-top {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .checkbox {
+    width: 22px;
+    height: 22px;
+    border-radius: 6px;
+    border: 1.5px solid var(--amber-dim);
+    flex-shrink: 0;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.15s ease;
+  }
+
+  .checkbox.checked {
+    background: var(--amber);
+    border-color: var(--amber);
+  }
+
+  .checkbox.checked::after {
+    content: '✓';
+    color: var(--ink);
+    font-size: 13px;
+    font-weight: 700;
+  }
+
+  .front-name {
+    font-family: 'Space Grotesk', sans-serif;
+    font-weight: 700;
+    font-size: 14px;
+    flex: 1;
+  }
+
+  .front-name .tag {
+    font-size: 10px;
+    color: var(--cream-dim);
+    font-family: 'Inter', sans-serif;
+    font-weight: 400;
+    display: block;
+    margin-top: 1px;
+  }
+
+  input[type=text] {
+    width: 100%;
+    background: var(--ink-3);
+    border: 1px solid var(--line);
+    border-radius: 6px;
+    color: var(--cream);
+    padding: 9px 10px;
+    font-size: 13px;
+    margin-top: 10px;
+    font-family: 'Inter', sans-serif;
+  }
+
+  input[type=text]::placeholder { color: #5C6270; }
+  input[type=text]:focus { outline: none; border-color: var(--amber-dim); }
+
+  .health-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: var(--ink-2);
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    padding: 14px 16px;
+    margin: 16px 0 10px;
+  }
+
+  .health-row .front-name { font-size: 13px; }
+
+  .section-label {
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--cream-dim);
+    margin: 20px 0 8px 2px;
+  }
+
+  textarea {
+    width: 100%;
+    background: var(--ink-2);
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    color: var(--cream);
+    padding: 12px 14px;
+    font-size: 13px;
+    font-family: 'Inter', sans-serif;
+    resize: none;
+    min-height: 54px;
+  }
+
+  textarea:focus { outline: none; border-color: var(--amber-dim); }
+  textarea::placeholder { color: #5C6270; }
+
+  button.save {
+    width: 100%;
+    background: var(--amber);
+    color: var(--ink);
+    border: none;
+    border-radius: 10px;
+    padding: 14px;
+    font-family: 'Space Grotesk', sans-serif;
+    font-weight: 700;
+    font-size: 14px;
+    margin-top: 20px;
+    cursor: pointer;
+    letter-spacing: 0.01em;
+  }
+
+  button.save:active { opacity: 0.85; }
+
+  .status {
+    text-align: center;
+    font-size: 12px;
+    color: var(--amber);
+    margin-top: 10px;
+    min-height: 16px;
+  }
+
+  .history {
+    margin-top: 30px;
+  }
+
+  .history-item {
+    border-top: 1px solid var(--line);
+    padding: 12px 2px;
+    font-size: 12px;
+  }
+
+  .history-date {
+    font-family: 'Space Grotesk', sans-serif;
+    font-weight: 700;
+    color: var(--amber);
+    font-size: 12px;
+    margin-bottom: 4px;
+  }
+
+  .history-line {
+    color: var(--cream-dim);
+    line-height: 1.5;
+  }
+
+  .history-line b { color: var(--cream); font-weight: 500; }
+
+  .empty {
+    text-align: center;
+    color: var(--cream-dim);
+    font-size: 12px;
+    padding: 20px 0;
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header>
+    <div>
+      <h1>Lock In</h1>
+      <div class="date-label" id="today-label">—</div>
+    </div>
+    <div class="streak">
+      <div class="streak-num" id="streak-num">0</div>
+      <div class="streak-label">day streak</div>
+    </div>
+  </header>
+
+  <div class="person-toggle" id="person-toggle">
+    <div class="person-btn active" data-person="Boo">Boo</div>
+    <div class="person-btn" data-person="Shane">Shane</div>
+  </div>
+
+  <div id="fronts"></div>
+
+  <div class="health-row">
+    <div class="checkbox" id="cb-health"></div>
+    <div class="front-name">Health check-in done<span class="tag">meds / routine / stability</span></div>
+  </div>
+
+  <div class="section-label">Blocking me today</div>
+  <textarea id="blocker" placeholder="Anything stuck, or leave blank"></textarea>
+
+  <button class="save" id="save-btn">Save today's log</button>
+  <div class="status" id="status"></div>
+
+  <div class="history">
+    <div class="section-label">Past entries</div>
+    <div id="history-list"></div>
+  </div>
+
+</div>
+
+<script>
+const FRONTS_BOO = [
+  { key: 'degree', name: 'Degree', tag: 'hardware + docs' },
+  { key: 'job', name: 'QA / Job hunt', tag: 'course + applications' },
+  { key: 'wnh', name: 'WNH', tag: 'recipe testing' },
+  { key: 'alma', name: 'Alma Mater', tag: 'website skeleton' },
+];
+
+const FRONTS_SHANE = [
+  { key: 'troots', name: 'Troots.co', tag: '' },
+  { key: 'vouchee', name: 'Vouchee', tag: '' },
+  { key: 'clothing', name: 'Clothing', tag: '' },
+  { key: 'wnh', name: 'WNH', tag: '' },
+  { key: 'tourism', name: 'Tourism', tag: '' },
+];
+
+function getFronts() {
+  return currentPerson === 'Shane' ? FRONTS_SHANE : FRONTS_BOO;
+}
+
+function todayKey() {
+  const d = new Date();
+  return d.toISOString().slice(0, 10);
+}
+
+function formatLabel(dateStr) {
+  const d = new Date(dateStr + 'T00:00:00');
+  return d.toLocaleDateString('en-US', { weekday: 'long', month: 'short', day: 'numeric' });
+}
+
+let currentPerson = 'Boo';
+
+let state = {
+  fronts: {},
+  health: false,
+  blocker: ''
+};
+
+document.querySelectorAll('.person-btn').forEach(btn => {
+  btn.addEventListener('click', async () => {
+    document.querySelectorAll('.person-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    currentPerson = btn.dataset.person;
+    await loadTodayForPerson();
+  });
+});
+
+async function loadTodayForPerson() {
+  const entries = await loadAll();
+  const key = todayKey() + ':' + currentPerson;
+  const todayEntry = entries[key];
+  if (todayEntry) {
+    state = {
+      fronts: todayEntry.fronts || {},
+      health: !!todayEntry.health,
+      blocker: todayEntry.blocker || ''
+    };
+  } else {
+    state = { fronts: {}, health: false, blocker: '' };
+  }
+  document.getElementById('blocker').value = state.blocker;
+  renderFronts();
+  renderHealth();
+}
+
+function renderFronts() {
+  const fronts = getFronts();
+  const container = document.getElementById('fronts');
+  container.innerHTML = '';
+  fronts.forEach(f => {
+    const done = !!(state.fronts[f.key] && state.fronts[f.key].done);
+    const note = (state.fronts[f.key] && state.fronts[f.key].note) || '';
+    const div = document.createElement('div');
+    div.className = 'front';
+    div.innerHTML = `
+      <div class="front-top">
+        <div class="checkbox ${done ? 'checked' : ''}" data-key="${f.key}"></div>
+        <div class="front-name">${f.name}${f.tag ? '<span class="tag">' + f.tag + '</span>' : ''}</div>
+      </div>
+      <input type="text" data-note="${f.key}" placeholder="What moved today" value="${note.replace(/"/g,'&quot;')}">
+    `;
+    container.appendChild(div);
+  });
+
+  container.querySelectorAll('.checkbox').forEach(cb => {
+    cb.addEventListener('click', () => {
+      const key = cb.dataset.key;
+      if (!state.fronts[key]) state.fronts[key] = { done: false, note: '' };
+      state.fronts[key].done = !state.fronts[key].done;
+      cb.classList.toggle('checked');
+    });
+  });
+
+  container.querySelectorAll('input[data-note]').forEach(inp => {
+    inp.addEventListener('input', () => {
+      const key = inp.dataset.note;
+      if (!state.fronts[key]) state.fronts[key] = { done: false, note: '' };
+      state.fronts[key].note = inp.value;
+    });
+  });
+}
+
+function renderHealth() {
+  const cb = document.getElementById('cb-health');
+  cb.classList.toggle('checked', state.health);
+}
+
+document.getElementById('cb-health').addEventListener('click', () => {
+  state.health = !state.health;
+  renderHealth();
+});
+
+document.getElementById('blocker').addEventListener('input', (e) => {
+  state.blocker = e.target.value;
+});
+
+async function computeStreak(entries, person) {
+  let streak = 0;
+  let cursor = new Date();
+  while (true) {
+    const dateStr = cursor.toISOString().slice(0, 10);
+    const key = dateStr + ':' + person;
+    if (entries[key]) {
+      streak++;
+      cursor.setDate(cursor.getDate() - 1);
+    } else {
+      break;
+    }
+  }
+  return streak;
+}
+
+// ---- JSONBin backend ----
+const JSONBIN_KEY = '$2a$10$Y7b9qizyCJei0oxKzw3idOvXLqZzTBiqpcmlJpVpBp0QlB2VoSyuS';
+let BIN_ID = ''; // will be filled in once created — see banner on first run
+
+async function ensureBin() {
+  if (BIN_ID) return BIN_ID;
+  const stored = localStorage.getItem('lockin_bin_id');
+  if (stored) { BIN_ID = stored; return BIN_ID; }
+
+  try {
+    const res = await fetch('https://api.jsonbin.io/v3/b', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-Master-Key': JSONBIN_KEY,
+        'X-Bin-Name': 'lock-in-log'
+      },
+      body: JSON.stringify({})
+    });
+
+    if (!res.ok) {
+      const errText = await res.text();
+      throw new Error('HTTP ' + res.status + ': ' + errText);
+    }
+
+    const data = await res.json();
+    BIN_ID = data.metadata.id;
+    localStorage.setItem('lockin_bin_id', BIN_ID);
+
+    const banner = document.createElement('div');
+    banner.style.cssText = 'background:#E8A33D;color:#14171C;padding:12px 14px;border-radius:10px;font-size:12px;margin-bottom:14px;font-weight:600;';
+    banner.textContent = 'Bin created — send this ID to Claude so it can be locked in for both of you: ' + BIN_ID;
+    document.querySelector('.wrap').prepend(banner);
+
+    return BIN_ID;
+  } catch (err) {
+    const errBanner = document.createElement('div');
+    errBanner.style.cssText = 'background:#C0392B;color:#fff;padding:12px 14px;border-radius:10px;font-size:12px;margin-bottom:14px;font-weight:600;word-break:break-word;';
+    errBanner.textContent = 'Bin creation failed — screenshot this and send it: ' + err.message;
+    document.querySelector('.wrap').prepend(errBanner);
+    throw err;
+  }
+}
+
+async function loadAll() {
+  try {
+    const id = await ensureBin();
+    const res = await fetch('https://api.jsonbin.io/v3/b/' + id + '/latest', {
+      headers: { 'X-Master-Key': JSONBIN_KEY }
+    });
+    const data = await res.json();
+    return (data && data.record) || {};
+  } catch (e) {
+    return {};
+  }
+}
+
+async function saveEntryToBin(comboKey, entryData) {
+  const id = await ensureBin();
+  const all = await loadAll();
+  all[comboKey] = entryData;
+  const res = await fetch('https://api.jsonbin.io/v3/b/' + id, {
+    method: 'PUT',
+    headers: {
+      'Content-Type': 'application/json',
+      'X-Master-Key': JSONBIN_KEY
+    },
+    body: JSON.stringify(all)
+  });
+  return res.ok;
+}
+// ---- end JSONBin backend ----
+
+async function init() {
+  document.getElementById('today-label').textContent = formatLabel(todayKey());
+  await loadTodayForPerson();
+  await refreshStreakAndHistory();
+}
+
+async function refreshStreakAndHistory() {
+  const entries = await loadAll();
+  const streak = await computeStreak(entries, currentPerson);
+  document.getElementById('streak-num').textContent = streak;
+  renderHistory(entries);
+}
+
+function renderHistory(entries) {
+  const list = document.getElementById('history-list');
+  const todayCombo = todayKey();
+  // group by date
+  const byDate = {};
+  Object.keys(entries).forEach(combo => {
+    const idx = combo.lastIndexOf(':');
+    const date = combo.slice(0, idx);
+    const person = combo.slice(idx + 1);
+    if (date === todayCombo) return;
+    if (!byDate[date]) byDate[date] = {};
+    byDate[date][person] = entries[combo];
+  });
+  const dates = Object.keys(byDate).sort().reverse().slice(0, 14);
+  if (dates.length === 0) {
+    list.innerHTML = '<div class="empty">Nothing logged yet — today\'s your first.</div>';
+    return;
+  }
+  list.innerHTML = '';
+  dates.forEach(d => {
+    const people = byDate[d];
+    const div = document.createElement('div');
+    div.className = 'history-item';
+    let lines = '';
+    Object.keys(people).forEach(person => {
+      const e = people[person];
+      const personFronts = person === 'Shane' ? FRONTS_SHANE : FRONTS_BOO;
+      const doneFronts = personFronts.filter(f => e.fronts && e.fronts[f.key] && e.fronts[f.key].done).map(f => f.name);
+      lines += `<div class="history-line"><b>${person}</b> — ${doneFronts.length}/${personFronts.length} fronts${e.health ? ' · health ✓' : ''}${e.blocker ? ' · blocked: ' + e.blocker.slice(0,40) : ''}</div>`;
+    });
+    div.innerHTML = `<div class="history-date">${formatLabel(d)}</div>${lines}`;
+    list.appendChild(div);
+  });
+}
+
+document.getElementById('save-btn').addEventListener('click', async () => {
+  const statusEl = document.getElementById('status');
+  statusEl.textContent = 'Saving…';
+  try {
+    const key = todayKey() + ':' + currentPerson;
+    const ok = await saveEntryToBin(key, state);
+    if (ok) {
+      statusEl.textContent = 'Saved ✓';
+      await refreshStreakAndHistory();
+      setTimeout(() => { statusEl.textContent = ''; }, 2000);
+    } else {
+      statusEl.textContent = 'Could not save — try again';
+    }
+  } catch (e) {
+    statusEl.textContent = 'Error saving';
+  }
+});
+
+init();
+</script>
+</body>
+</html>
