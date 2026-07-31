@@ -481,6 +481,11 @@ document.getElementById('extra').addEventListener('input', (e) => {
 async function computeStreak(entries, person) {
   let streak = 0;
   let cursor = new Date();
+  const todayStr = cursor.toISOString().slice(0, 10) + ':' + person;
+  if (!entries[todayStr]) {
+    // today not logged yet — start counting from yesterday instead
+    cursor.setDate(cursor.getDate() - 1);
+  }
   while (true) {
     const dateStr = cursor.toISOString().slice(0, 10);
     const key = dateStr + ':' + person;
