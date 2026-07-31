@@ -268,6 +268,54 @@
 
   .history-line b { color: var(--cream); font-weight: 500; }
 
+  .expand-hint {
+    font-family: 'Inter', sans-serif;
+    font-weight: 400;
+    font-size: 10px;
+    color: var(--cream-dim);
+    text-transform: none;
+    letter-spacing: 0;
+    margin-left: 6px;
+  }
+
+  .history-detail {
+    margin-top: 8px;
+    padding-top: 8px;
+    border-top: 1px dashed var(--line);
+  }
+
+  .detail-person {
+    margin-bottom: 10px;
+  }
+
+  .detail-person:last-child { margin-bottom: 0; }
+
+  .detail-person-name {
+    font-family: 'Space Grotesk', sans-serif;
+    font-weight: 700;
+    color: var(--amber);
+    font-size: 12px;
+    margin-bottom: 4px;
+  }
+
+  .detail-row {
+    color: var(--cream);
+    font-size: 12px;
+    line-height: 1.6;
+    padding-left: 2px;
+  }
+
+  .detail-check {
+    color: var(--amber);
+    font-weight: 700;
+    margin-right: 2px;
+  }
+
+  .detail-empty {
+    color: var(--cream-dim);
+    font-style: italic;
+  }
+
   .empty {
     text-align: center;
     color: var(--cream-dim);
@@ -557,13 +605,28 @@ function renderHistory(entries) {
     const div = document.createElement('div');
     div.className = 'history-item';
     let lines = '';
+    let details = '';
     Object.keys(people).forEach(person => {
       const e = people[person];
       const personFronts = person === 'Shane' ? FRONTS_SHANE : FRONTS_BOO;
       const doneFronts = personFronts.filter(f => e.fronts && e.fronts[f.key] && e.fronts[f.key].done).map(f => f.name);
       lines += `<div class="history-line"><b>${person}</b> — ${doneFronts.length}/${personFronts.length} fronts${e.health ? ' · health ✓' : ''}${e.extra ? ' · extra: ' + e.extra.slice(0,40) : ''}${e.blocker ? ' · blocked: ' + e.blocker.slice(0,40) : ''}</div>`;
+
+      let frontDetails = '';
+      personFronts.forEach(f => {
+        const fd = e.fronts && e.fronts[f.key];
+        const done = fd && fd.done;
+        const note = (fd && fd.note) || '';
+        frontDetails += `<div class="detail-row"><span class="detail-check">${done ? '✓' : '·'}</span> <b>${f.name}:</b> ${note ? note : '<span class="detail-empty">no note</span>'}</div>`;
+      });
+      details += `<div class="detail-person"><div class="detail-person-name">${person}</div>${frontDetails}${e.extra ? '<div class="detail-row"><b>Extra:</b> ' + e.extra + '</div>' : ''}${e.blocker ? '<div class="detail-row"><b>Blocked:</b> ' + e.blocker + '</div>' : ''}</div>`;
     });
-    div.innerHTML = `<div class="history-date">${formatLabel(d)}</div>${lines}`;
+    div.innerHTML = `<div class="history-date">${formatLabel(d)} <span class="expand-hint">tap for details</span></div>${lines}<div class="history-detail" style="display:none;">${details}</div>`;
+    div.addEventListener('click', () => {
+      const detailEl = div.querySelector('.history-detail');
+      detailEl.style.display = detailEl.style.display === 'none' ? 'block' : 'none';
+    });
+    div.style.cursor = 'pointer';
     list.appendChild(div);
   });
 }
